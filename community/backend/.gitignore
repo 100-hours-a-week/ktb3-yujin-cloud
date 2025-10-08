@@ -1,0 +1,24 @@
+HELP.md
+
+# Gradle
+.gradle/
+build/
+
+# IntelliJ
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+
+# Spring Boot
+target/
+
+# Test configuration (local only)
+src/test/resources/application.yml
