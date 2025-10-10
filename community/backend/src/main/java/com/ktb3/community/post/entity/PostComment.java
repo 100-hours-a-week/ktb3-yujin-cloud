@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Getter
+@Table(name = "post_comment")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class PostComment {
@@ -29,7 +30,7 @@ public class PostComment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="comment_id")
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String comment;
 
     @CreatedDate

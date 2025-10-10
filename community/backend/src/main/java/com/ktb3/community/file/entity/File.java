@@ -92,6 +92,12 @@ public class File {
         return file;
     }
 
+    // 파일 순서 변경
+    public void updateOrder(Integer newOrder) {
+        this.fileOrder = newOrder;
+    }
+
+    // 소프트 삭제
     public void deleteFile(){
         this.deletedAt = LocalDateTime.now();
     }

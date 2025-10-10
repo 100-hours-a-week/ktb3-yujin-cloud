@@ -2,7 +2,7 @@ package com.ktb3.community.member.service;
 
 import com.ktb3.community.config.SecurityConfig;
 import com.ktb3.community.file.entity.File;
-import com.ktb3.community.file.repository.FileRepository;
+import com.ktb3.community.file.service.FileService;
 import com.ktb3.community.member.dto.MemberDto;
 import com.ktb3.community.member.dto.MemberDto.SignUpResponse;
 import com.ktb3.community.member.dto.MemberDto.SignUpRequest;
@@ -23,7 +23,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberAuthRepository memberAuthRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FileRepository fileRepository;
+    private final FileService fileService;
 
     // 이메일 중복확인
     public boolean isEmailDuplicate(String email){
@@ -78,9 +78,7 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
         // 프로필 이미지 조회
-        String profileUrl = fileRepository.findProfileByMemberId(memberId)
-                .map(File::getFilePath)
-                .orElse(null);
+        String profileUrl = fileService.getProfileImageUrl(memberId);
 
         return MemberDto.DetailResponse.from(member, profileUrl);
     }
@@ -104,43 +102,16 @@ public class MemberService {
         String profileImageUrl = null;
 
         // 3-1. 프로필 이미지 삭제
-        if(deleteProfile) {
-            fileRepository.findProfileByMemberId(memberId)
-                    .ifPresent(file->{
-                        // TODO. S3에서 삭제
-                        // 회원프로필 물리삭제
-                        fileRepository.delete(file);
-                    });
-        }
-        // 3-2. 이미지 변경
-        else if(profileImage != null && !profileImage.isEmpty()) {
-            fileRepository.findProfileByMemberId(memberId)
-                    .ifPresent(existingFile->{
-                        // TODO. S3에서 삭제
-                        // 기존 회원 프로필 물리삭제
-                        fileRepository.delete(existingFile);
-                    });
+        if (deleteProfile) {
+            fileService.deleteProfileImage(member);
 
-            // TODO. S3에 업로드
-//            String uploadUrl = uploadToS3(profileImage);
-            String uploadUrl = "https://sample.jpg";
+            // 3-2. 이미지 변경
+        } else if (profileImage != null && !profileImage.isEmpty()) {
+            profileImageUrl = fileService.saveProfileImage(member, profileImage);
 
-            File newProfileImg = File.createProfileImage(
-                    member,uploadUrl,
-                    profileImage.getOriginalFilename(),
-                    profileImage.getSize(),
-                    profileImage.getContentType());
-
-            fileRepository.save(newProfileImg);
-
-            profileImageUrl = uploadUrl;
-
-        }
-        // 3-3. 이미지 변경 없음
-        else {
-            profileImageUrl = fileRepository.findProfileByMemberId(memberId)
-                    .map(File::getFilePath)
-                    .orElse(null);
+            // 3-3. 이미지 변경 없음
+        } else {
+            profileImageUrl = fileService.getProfileImageUrl(memberId);
         }
 
         return MemberDto.DetailResponse.from(member, profileImageUrl);
@@ -166,8 +137,7 @@ public class MemberService {
         member.delete();
 
         // 4. 회원 프로필 논리 삭제
-        fileRepository.findProfileByMemberId(memberId)
-                .ifPresent(File::deleteFile);
+        fileService.softDeleteProfileImage(memberId);
 
     }
 }

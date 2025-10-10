@@ -30,7 +30,8 @@ public class Post {
     private String title;
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
-    private Integer hit = 0;
+    @Column(nullable = false)
+    private long hit = 0L;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
