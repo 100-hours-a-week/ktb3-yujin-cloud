@@ -1,5 +1,6 @@
 package com.ktb3.community.member.service;
 
+import com.ktb3.community.common.exception.BusinessException;
 import com.ktb3.community.config.SecurityConfig;
 import com.ktb3.community.file.entity.File;
 import com.ktb3.community.file.service.FileService;
@@ -12,6 +13,8 @@ import com.ktb3.community.member.repository.MemberAuthRepository;
 import com.ktb3.community.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,16 +43,16 @@ public class MemberService {
     public SignUpResponse signUp(SignUpRequest request){
 
 
-        if (isEmailDuplicate(request.getEmail())) {
-            throw new IllegalArgumentException("중복된 이메일입니다.");
-        }
-
-        if (isNicknameDuplicate(request.getEmail())) {
-            throw new IllegalArgumentException("중복된 닉네입입니다.");
-        }
+//        if (isEmailDuplicate(request.getEmail())) {
+//            throw new IllegalArgumentException("중복된 이메일입니다.");
+//        }
+//
+//        if (isNicknameDuplicate(request.getEmail())) {
+//            throw new IllegalArgumentException("중복된 닉네입입니다.");
+//        }
 
         if(!request.isPasswordMatching()) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다.");
         }
 
         // member에 회원정보 저장

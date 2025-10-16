@@ -34,9 +34,9 @@ public class MemberController {
     }
 
     @PostMapping
-    public ResponseEntity<String> signUp(@Valid @RequestBody MemberDto.SignUpRequest request){
+    public ResponseEntity<Map<String, String>> signUp(@Valid @RequestBody MemberDto.SignUpRequest request){
         memberService.signUp(request);
-        return ResponseEntity.ok("회원가입이 완료되었습니다.");
+        return ResponseEntity.ok(Map.of("message", "회원가입이 완료되었습니다."));
     }
 
     // 회원 정보 조회

@@ -45,7 +45,7 @@ public class MemberDto {
         private String password;
 
         @NotBlank(message = "비밀번호 확인은 필수입니다.")
-        private String passwordConfirm;
+        private String confirmPassword;
 
         @NotBlank(message = "닉네임은 필수입니다.")
         @Size(min = 1, max = 10, message = "닉네임은 최대 10자까지만 가능합니다.")
@@ -54,7 +54,7 @@ public class MemberDto {
 
         // 비번,비번확인 일치여부
         public boolean isPasswordMatching(){
-            return password != null && password.equals(passwordConfirm);
+            return password != null && password.equals(confirmPassword);
         }
 
     }
