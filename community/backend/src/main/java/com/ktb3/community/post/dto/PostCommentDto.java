@@ -32,7 +32,6 @@ public class PostCommentDto {
         private String authorNickname;
         private String authorProfileImageUrl;
 
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private final LocalDateTime createdAt;
 
         // 권한

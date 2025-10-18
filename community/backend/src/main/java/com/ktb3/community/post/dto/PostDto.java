@@ -31,7 +31,6 @@ public class PostDto {
         private String authorNickname;
         private String authorProfileImageUrl;
 
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime createdAt;
 
         public static PostListResponse from(Post post,
@@ -104,7 +103,6 @@ public class PostDto {
         private String authorNickname;
         private String authorProfileImageUrl;
 
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private final LocalDateTime createdAt;
 
         // 권한 정보 (프론트에서 버튼 표시 여부 판단)
