@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="${serviceName} ?: '커뮤니티'">커뮤니티</title>
+    <style>
+        body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; line-height: 1.6; color:#222; margin:0; }
+        .container { max-width:960px; margin: 40px auto; padding: 0 20px; }
+        h1 { font-size: 1.875rem; margin-bottom: .5rem; }
+        .meta { color:#666; margin-bottom: 2rem; }
+        nav.toc { background:#fafafa; border:1px solid #eee; padding:1rem; border-radius:12px; margin: 1rem 0 2rem; }
+        nav.toc a { display:block; color:#333; text-decoration:none; padding:.25rem 0; }
+        section { margin: 2.25rem 0; }
+        h2 { font-size: 1.25rem; margin-bottom:.5rem; }
+        ul { padding-left: 1.2rem; }
+        .footer { margin-top: 3rem; font-size:.95rem; color:#555; }
+        code.badge { background:#f1f1f1; border-radius:6px; padding:.1rem .4rem; font-size:.9em; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1 th:text="(${serviceName} ?: '커뮤니티') + ' 이용약관'">커뮤니티 이용약관</h1>
+    <p class="meta">
+        시행일: <span th:text="${effectiveDate} ?: '2025-10-20'">2025-10-20</span> ·
+        마지막 업데이트: <span th:text="${lastUpdated} ?: '2025-10-20'">2025-10-20</span>
+    </p>
+
+    <nav class="toc" aria-label="목차">
+        <strong>목차</strong>
+        <a href="#section-1">1. 목적</a>
+        <a href="#section-2">2. 정의</a>
+        <a href="#section-3">3. 약관의 게시 및 개정</a>
+        <a href="#section-4">4. 회원가입 및 계정</a>
+        <a href="#section-5">5. 서비스 이용</a>
+        <a href="#section-6">6. 게시물/댓글/파일의 권리와 책임</a>
+        <a href="#section-7">7. 금지행위</a>
+        <a href="#section-8">8. 서비스의 변경, 중단</a>
+        <a href="#section-9">9. 면책 및 책임 제한</a>
+        <a href="#section-10">10. 분쟁 해결 및 준거법</a>
+        <a href="#section-11">11. 연락처</a>
+    </nav>
+
+    <section id="section-1">
+        <h2>1. 목적</h2>
+        <p>
+            본 약관은 <span th:text="${companyName} ?: '커뮤니티 운영팀'">커뮤니티 운영팀</span>
+            (이하 “회사”)가 제공하는 커뮤니티 서비스(이하 “서비스”)의 이용과 관련하여 회사와 회원 간의 권리·의무 및 책임사항을 규정함을 목적으로 합니다.
+        </p>
+    </section>
+
+    <section id="section-2">
+        <h2>2. 정의</h2>
+        <ul>
+            <li>“회원”: 서비스에 가입하여 약관에 따라 이용하는 자</li>
+            <li>“게시물”: 회원이 서비스 내에 게시 또는 업로드한 글, 댓글, 이미지, 파일 등 일체의 콘텐츠</li>
+            <li>“계정”: 회원 식별과 서비스 이용을 위해 필요한 이메일/닉네임 등 식별 정보</li>
+        </ul>
+    </section>
+
+    <section id="section-3">
+        <h2>3. 약관의 게시 및 개정</h2>
+        <ul>
+            <li>회사는 본 약관을 서비스 초기화면 또는 설정 화면 등에 게시합니다.</li>
+            <li>관련 법령 변경 또는 서비스 개선을 위해 약관을 개정할 수 있으며, 중요한 변경은 사전 고지합니다.</li>
+        </ul>
+    </section>
+
+    <section id="section-4">
+        <h2>4. 회원가입 및 계정</h2>
+        <ul>
+            <li>회원은 정확한 정보를 제공해야 하며, 타인의 정보를 도용할 수 없습니다.</li>
+            <li>비밀번호는 회원이 안전하게 관리해야 하며, 계정의 부정 사용을 인지한 경우 즉시 회사에 알려야 합니다.</li>
+            <li>휴면/탈퇴/이용정지 등 계정 상태에 대한 정책은 별도 운영정책에 따릅니다.</li>
+        </ul>
+    </section>
+
+    <section id="section-5">
+        <h2>5. 서비스 이용</h2>
+        <ul>
+            <li>서비스는 게시글 열람·작성, 댓글, 좋아요, 파일 업로드 등 커뮤니티 기능을 제공합니다.</li>
+            <li>서비스의 일부는 로그인 후 이용할 수 있으며, 서비스는 운영상·기술상 필요에 따라 변경될 수 있습니다.</li>
+        </ul>
+    </section>
+
+    <section id="section-6">
+        <h2>6. 게시물/댓글/파일의 권리와 책임</h2>
+        <ul>
+            <li>게시물의 저작권은 원칙적으로 해당 회원에게 귀속됩니다.</li>
+            <li>회원은 게시물에 대한 비독점적 사용권을 회사에 부여합니다(서비스 운영, 노출, 백업, 개선 목적).</li>
+            <li>타인의 권리를 침해하는 게시물(저작권/초상권/명예훼손 등)에 대해서는 게시 제한 또는 삭제될 수 있습니다.</li>
+            <li>이미지·파일 업로드 시 악성코드, 개인정보 유출 등에 유의할 책임은 회원에게 있습니다.</li>
+        </ul>
+    </section>
+
+    <section id="section-7">
+        <h2>7. 금지행위</h2>
+        <ul>
+            <li>불법, 음란, 혐오, 차별, 폭력 조장 등 법령·미풍양속을 해치는 행위</li>
+            <li>스팸·도배, 서비스 장애 유발, 시스템 취약점 악용, 리버스엔지니어링</li>
+            <li>타인의 개인정보 또는 계정 무단수집/도용</li>
+        </ul>
+    </section>
+
+    <section id="section-8">
+        <h2>8. 서비스의 변경, 중단</h2>
+        <p>
+            회사는 시스템 점검, 보안 이슈, 운영 정책 변경 등 합리적 사유가 있을 경우
+            서비스의 전부 또는 일부를 변경·중단할 수 있습니다. 중요 변경은 사전에 공지합니다.
+        </p>
+    </section>
+
+    <section id="section-9">
+        <h2>9. 면책 및 책임 제한</h2>
+        <ul>
+            <li>불가항력(천재지변, IDC 장애, 네트워크 장애 등)으로 인한 손해에 대하여 회사는 책임을 지지 않습니다.</li>
+            <li>회원 상호 간 분쟁은 원칙적으로 당사자 간에 해결하며, 회사의 귀책 사유가 없는 한 책임을 부담하지 않습니다.</li>
+        </ul>
+    </section>
+
+    <section id="section-10">
+        <h2>10. 분쟁 해결 및 준거법</h2>
+        <p>본 약관은 대한민국 법령을 준거법으로 하며, 분쟁이 발생한 경우 민사소송법상의 관할법원에 따릅니다.</p>
+    </section>
+
+    <section id="section-11">
+        <h2>11. 연락처</h2>
+        <p>
+            이메일: <a th:href="'mailto:' + (${supportEmail} ?: 'support@example.com')"
+                    th:text="${supportEmail} ?: 'support@example.com'">support@example.com</a><br />
+            상호: <span th:text="${companyName} ?: '커뮤니티 운영팀'">커뮤니티 운영팀</span>
+        </p>
+    </section>
+
+    <div class="footer">
+        <span>버전 <code class="badge" th:text="${version} ?: 'v1.0'">v1.0</code></span>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title th:text="(${serviceName} ?: '커뮤니티') + ' 개인정보처리방침'">커뮤니티 개인정보처리방침</title>
+    <style>
+        body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; line-height: 1.6; color:#222; margin:0; }
+        .container { max-width:960px; margin: 40px auto; padding: 0 20px; }
+        h1 { font-size: 1.875rem; margin-bottom: .5rem; }
+        .meta { color:#666; margin-bottom: 2rem; }
+        nav.toc { background:#fafafa; border:1px solid #eee; padding:1rem; border-radius:12px; margin: 1rem 0 2rem; }
+        nav.toc a { display:block; color:#333; text-decoration:none; padding:.25rem 0; }
+        section { margin: 2.25rem 0; }
+        h2 { font-size: 1.25rem; margin-bottom:.5rem; }
+        ul { padding-left:1.2rem; }
+        table { width:100%; border-collapse: collapse; margin-top:.75rem; }
+        th, td { border:1px solid #eee; padding:.6rem; text-align:left; vertical-align: top; }
+        .footer { margin-top: 3rem; font-size:.95rem; color:#555; }
+        code.badge { background:#f1f1f1; border-radius:6px; padding:.1rem .4rem; font-size:.9em; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1 th:text="(${serviceName} ?: '커뮤니티') + ' 개인정보처리방침'">커뮤니티 개인정보처리방침</h1>
+    <p class="meta">
+        시행일: <span th:text="${effectiveDate} ?: '2025-10-20'">2025-10-20</span> ·
+        마지막 업데이트: <span th:text="${lastUpdated} ?: '2025-10-20'">2025-10-20</span>
+    </p>
+
+    <nav class="toc" aria-label="목차">
+        <strong>목차</strong>
+        <a href="#p-1">1. 수집하는 개인정보의 항목</a>
+        <a href="#p-2">2. 개인정보의 수집·이용 목적</a>
+        <a href="#p-3">3. 처리 및 보유 기간</a>
+        <a href="#p-4">4. 제3자 제공 및 처리위탁</a>
+        <a href="#p-5">5. 정보주체의 권리</a>
+        <a href="#p-6">6. 쿠키(쿠키/로컬스토리지) 처리</a>
+        <a href="#p-7">7. 안전성 확보조치</a>
+        <a href="#p-8">8. 해외 이전</a>
+        <a href="#p-9">9. 개인정보 보호책임자</a>
+        <a href="#p-10">10. 고지의 의무</a>
+    </nav>
+
+    <section id="p-1">
+        <h2>1. 수집하는 개인정보의 항목</h2>
+        <table>
+            <thead><tr><th>구분</th><th>항목</th><th>수집 시점</th></tr></thead>
+            <tbody>
+            <tr>
+                <td>필수</td>
+                <td>이메일, 닉네임, 비밀번호(해시값)</td>
+                <td>회원가입/로그인</td>
+            </tr>
+            <tr>
+                <td>서비스 이용</td>
+                <td>게시글/댓글 내용, 업로드 파일(파일명, 경로, 크기, MIME), 좋아요 내역</td>
+                <td>서비스 이용 중</td>
+            </tr>
+            <tr>
+                <td>자동 수집</td>
+                <td>접속 로그, IP, 기기/브라우저 정보(보안/이상징후 탐지 목적)</td>
+                <td>접속 시 자동</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="p-2">
+        <h2>2. 개인정보의 수집·이용 목적</h2>
+        <ul>
+            <li>회원 식별 및 인증, 계정 관리</li>
+            <li>커뮤니티 기능 제공(게시글/댓글/좋아요/파일 업로드)</li>
+            <li>서비스 개선, 보안 및 부정 이용 방지, 고객 문의 대응</li>
+        </ul>
+    </section>
+
+    <section id="p-3">
+        <h2>3. 처리 및 보유 기간</h2>
+        <ul>
+            <li>회원 탈퇴 시 지체 없이 파기하되, 관련 법령 및 분쟁 대비 목적 범위 내에서 일정 기간 보관할 수 있습니다.</li>
+            <li>법령 보관 예: 거래·소비자 보호 관련 기록, 접속 로그(IP 포함) 등.</li>
+        </ul>
+    </section>
+
+    <section id="p-4">
+        <h2>4. 제3자 제공 및 처리위탁</h2>
+        <p>
+            원칙적으로 회원 동의 또는 법령 근거 없이 제3자에게 제공하지 않습니다.
+            서비스 운영에 필요한 경우 수탁사를 지정할 수 있으며, 수탁사 현황과 업무 범위는 공지 또는 본 방침에 반영합니다.
+        </p>
+    </section>
+
+    <section id="p-5">
+        <h2>5. 정보주체의 권리</h2>
+        <ul>
+            <li>열람·정정·삭제·처리정지 등 권리를 행사할 수 있습니다.</li>
+            <li>권리 행사는 <span th:text="${ privacyEmail } ?: ( supportEmail ?: 'privacy@example.com' )">privacy@example.com</span>로 요청할 수 있습니다.</li>
+        </ul>
+    </section>
+
+    <section id="p-6">
+        <h2>6. 쿠키(쿠키/로컬스토리지) 처리</h2>
+        <ul>
+            <li>세션 유지, 보안, 로그인 상태 유지를 위해 쿠키 또는 로컬스토리지를 사용할 수 있습니다.</li>
+            <li>브라우저 설정을 통해 저장을 거부하거나 삭제할 수 있으나, 일부 기능 이용이 제한될 수 있습니다.</li>
+        </ul>
+    </section>
+
+    <section id="p-7">
+        <h2>7. 안전성 확보조치</h2>
+        <ul>
+            <li>비밀번호 해시 저장, 최소 권한 원칙, 접근 통제, 전송 구간 암호화(HTTPS) 등</li>
+            <li>첨부파일 악성코드 점검 및 비공개 저장소 분리(가능한 경우)</li>
+        </ul>
+    </section>
+
+<!--    <section id="p-8">-->
+<!--        <h2>8. 해외 이전</h2>-->
+<!--        <p>-->
+<!--            데이터 처리 또는 보관이 해외 인프라를 사용하는 경우 관련 법령을 준수하며,-->
+<!--            이전 국가, 이전 일시·방법, 이전받는 자의 명칭·연락처, 이전 목적·항목·보유기간 등을 고지합니다.-->
+<!--        </p>-->
+<!--    </section>-->
+
+<!--    <section id="p-9">-->
+<!--        <h2>9. 개인정보 보호책임자</h2>-->
+<!--        <p>-->
+<!--            성명/직책: <span th:text="${privacyOfficer} ?: '개인정보 보호책임자'">개인정보 보호책임자</span><br/>-->
+<!--            이메일: <a th:href="'mailto:' + (${privacyEmail} ?: ${supportEmail} ?: 'privacy@example.com')"-->
+<!--                    th:text="${privacyEmail} ?: ${supportEmail} ?: 'privacy@example.com'">privacy@example.com</a>-->
+<!--        </p>-->
+<!--    </section>-->
+
+<!--    <section id="p-10">-->
+<!--        <h2>10. 고지의 의무</h2>-->
+<!--        <p>-->
+<!--            본 방침의 내용 추가, 삭제 및 수정이 있을 경우 개정 최소 7일 전부터 서비스 공지사항을 통해 고지합니다.-->
+<!--            중요한 변경 사항은 더 충분한 사전 고지 기간을 둘 수 있습니다.-->
+<!--        </p>-->
+<!--    </section>-->
+
+<!--    <div class="footer">-->
+<!--        <span>버전 <code class="badge" th:text="${version} ?: 'v1.0'">v1.0</code></span>-->
+<!--    </div>-->
+
+</div>
+</body>
+</html>
