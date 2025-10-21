@@ -7,6 +7,9 @@ import com.ktb3.community.post.service.PostService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,31 @@ public class PostCommentController {
         }
 
         return memberId;
+    }
+
+    /**
+     * 댓글 리스트
+     * @param postId
+     * @param page
+     * @param size
+     * @param session
+     * @return
+     */
+    @GetMapping
+    public ResponseEntity<Page<PostCommentDto.CommentResponse>> getComments(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            HttpSession session) {
+
+        // 1. 로그인 확인
+        Long currentMemberId = getMemberIdFromSession(session);
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<PostCommentDto.CommentResponse> comments =
+                commentService.getComments(postId, currentMemberId, pageable);
+
+        return ResponseEntity.ok(comments);
     }
 
     /**

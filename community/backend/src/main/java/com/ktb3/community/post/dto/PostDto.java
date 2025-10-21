@@ -109,17 +109,13 @@ public class PostDto {
         private final boolean isAuthor;  // 내가 작성한 게시물인가?
         private final boolean isLiked;   // 내가 좋아요를 눌렀는가?
 
-        // 댓글 목록 (페이징)
-        private final Page<PostCommentDto.CommentResponse> comments;
-
         public static PostDetailResponse of(Post post,
                                             List<String> imageUrls,
                                             String profileImageUrl,
                                             long likeCount,
                                             long commentCount,
                                             boolean isAuthor,
-                                            boolean isLiked,
-                                            Page<PostCommentDto.CommentResponse> comments) {
+                                            boolean isLiked) {
             return PostDetailResponse.builder()
                     .postId(post.getId())
                     .title(post.getTitle())
@@ -134,7 +130,6 @@ public class PostDto {
                     .createdAt(post.getCreatedAt())
                     .isAuthor(isAuthor)
                     .isLiked(isLiked)
-                    .comments(comments)
                     .build();
         }
     }

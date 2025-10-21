@@ -10,9 +10,13 @@ import com.ktb3.community.post.repository.PostCommentRepository;
 import com.ktb3.community.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +27,39 @@ public class PostCommentService {
     private final MemberRepository memberRepository;
     private final FileService fileService;
 
+    /**
+     *
+     * @param postId
+     * @param currentMemberId
+     * @param pageable
+     * @return
+     */
+    public Page<PostCommentDto.CommentResponse> getComments(Long postId,
+                                                            Long currentMemberId,
+                                                            Pageable pageable) {
+
+        // 1. 댓글 목록 조회 (Member JOIN FETCH)
+        Page<PostComment> comments = commentRepository.findCommentsByPostId(postId, pageable);
+
+        if (comments.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // 2. 작성자 ID 목록 추출
+        List<Long> memberIds = comments.getContent().stream()
+                .map(c -> c.getMember().getId())
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 3. 프로필 이미지 배치 조회 (N+1 방지)
+        Map<Long, String> profileUrls = fileService.getProfileImageUrls(memberIds);
+
+        // 4. DTO 변환
+        return comments.map(comment -> {
+            String profileUrl = profileUrls.get(comment.getMember().getId());
+            return PostCommentDto.CommentResponse.from(comment, profileUrl, currentMemberId);
+        });
+    }
     /**
      * 댓글 생성
      * @param postId

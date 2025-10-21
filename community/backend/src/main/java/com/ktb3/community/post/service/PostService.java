@@ -4,22 +4,16 @@ import com.ktb3.community.file.entity.File;
 import com.ktb3.community.file.service.FileService;
 import com.ktb3.community.member.entity.Member;
 import com.ktb3.community.member.repository.MemberRepository;
-import com.ktb3.community.post.dto.PostCommentDto;
 import com.ktb3.community.post.dto.PostDto;
 import com.ktb3.community.post.entity.Post;
-import com.ktb3.community.post.entity.PostComment;
 import com.ktb3.community.post.repository.PostCommentRepository;
 import com.ktb3.community.post.repository.PostLikeRepository;
 import com.ktb3.community.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -91,7 +85,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostDto.PostDetailResponse getPostDetail(Long postId, Long currentMemberId, Pageable commentPageable) {
+    public PostDto.PostDetailResponse getPostDetail(Long postId, Long currentMemberId) {
 
         // 1. 게시물 조회 (Member JOIN FETCH)
         Post post = postRepository.findByIdWithMember(postId)
@@ -116,10 +110,7 @@ public class PostService {
         boolean isAuthor = checkIsAuthor(post, currentMemberId);
         boolean isLiked = checkIsLiked(postId, currentMemberId);
 
-        // 8. 댓글 목록 조회 (페이징)
-        Page<PostCommentDto.CommentResponse> comments = getComments(postId, currentMemberId, commentPageable);
-
-        // 9. DTO 생성
+        // 8. DTO 생성
         return PostDto.PostDetailResponse.of(
                 post,
                 imageUrls,
@@ -127,37 +118,10 @@ public class PostService {
                 likeCount,
                 commentCount,
                 isAuthor,
-                isLiked,
-                comments
+                isLiked
         );
     }
 
-    private Page<PostCommentDto.CommentResponse> getComments(Long postId,
-                                                             Long currentMemberId,
-                                                             Pageable pageable) {
-
-        // 1. 댓글 목록 조회 (Member JOIN FETCH)
-        Page<PostComment> comments = commentRepository.findCommentsByPostId(postId, pageable);
-
-        if (comments.isEmpty()) {
-            return Page.empty(pageable);
-        }
-
-        // 2. 작성자 ID 목록 추출
-        List<Long> memberIds = comments.getContent().stream()
-                .map(comment -> comment.getMember().getId())
-                .distinct()
-                .collect(Collectors.toList());
-
-        // 3. 프로필 이미지 배치 조회 (N+1 방지)
-        Map<Long, String> profileUrls = fileService.getProfileImageUrls(memberIds);
-
-        // 4. DTO 변환
-        return comments.map(comment -> {
-            String profileUrl = profileUrls.get(comment.getMember().getId());
-            return PostCommentDto.CommentResponse.from(comment, profileUrl, currentMemberId);
-        });
-    }
 
     /**
      * 내가 작성한 게시물인지 확인

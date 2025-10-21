@@ -55,18 +55,13 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostDto.PostDetailResponse> getPostDetail(
             @PathVariable Long postId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
             HttpSession session) {
 
         // 1. 현재 로그인한 회원 ID 조회
         Long currentMemberId = getMemberIdFromSession(session);
 
-        // 2. 댓글 페이징 설정
-        Pageable commentPageable = PageRequest.of(page, size);
-
-        // 3. 게시물 상세 조회
-        PostDto.PostDetailResponse response = postService.getPostDetail(postId, currentMemberId, commentPageable);
+        // 2. 게시물 상세 조회
+        PostDto.PostDetailResponse response = postService.getPostDetail(postId, currentMemberId);
 
         return ResponseEntity.ok(response);
     }
