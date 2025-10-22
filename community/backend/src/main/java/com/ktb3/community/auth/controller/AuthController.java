@@ -2,11 +2,13 @@ package com.ktb3.community.auth.controller;
 
 import com.ktb3.community.auth.dto.AuthDto;
 import com.ktb3.community.auth.service.AuthService;
+import com.ktb3.community.common.exception.BusinessException;
 import com.ktb3.community.member.dto.MemberDto;
 import com.ktb3.community.member.service.MemberService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,25 +48,25 @@ public class AuthController {
 
     // 비밀번호 변경
     @PatchMapping("/password")
-    public ResponseEntity<?> changePassword(
+    public ResponseEntity<Map<String, String>>  changePassword(
             @Valid @RequestBody AuthDto.ChangePasswordRequest request,
             HttpSession session){
 
         // 1. 로그인 확인
         Long memberId = (Long) session.getAttribute("memberId");
         if (memberId == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다");
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다");
         }
 
         // 2. 새 비밀번호 일치 확인
         if(!request.isNewPasswordMatching()) {
-            throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다.");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "새 비밀번호가 일치하지 않습니다.");
         }
 
         // 3. 비밀번호 변경
         authService.changePassword(memberId, request.getCurrentPassword(), request.getNewPassword());
 
-        return ResponseEntity.ok("비밀번호 변경이 완료되었습니다.");
+        return ResponseEntity.ok(Map.of("message", "비밀번호 변경이 완료되었습니다."));
 
     }
 

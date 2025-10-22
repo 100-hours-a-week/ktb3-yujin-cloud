@@ -49,20 +49,20 @@ public class AuthService {
 
         // 1. 회원 조회
         Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
-                .orElseThrow(()-> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(()-> new BusinessException(HttpStatus.BAD_REQUEST,"회원을 찾을 수 없습니다."));
 
         // 2. 인증정보 조회
         MemberAuth memberAuth = memberAuthRepository.findById(memberId)
-                .orElseThrow(()-> new IllegalArgumentException("인증정보를 찾을 수 없습니다."));
+                .orElseThrow(()-> new BusinessException(HttpStatus.UNAUTHORIZED, "인증정보를 찾을 수 없습니다."));
 
         // 3. 현재 비밀번호 맞는지 확인
         if(!passwordEncoder.matches(currentPassword, memberAuth.getPassword())){
-            throw new IllegalArgumentException("현재 비밀번호가 일지하지 않습니다.");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일지하지 않습니다.");
         }
 
         // 4. 새로운 비밀번호랑 현재 비밀번호가 다른지 확인
         if (passwordEncoder.matches(newPassword, memberAuth.getPassword())) {
-            throw new IllegalArgumentException("새 비밀번호는 현재 비밀번호와 달라야 합니다");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "새 비밀번호는 현재 비밀번호와 달라야 합니다");
         }
 
         // 5. 새로운 비밀번호 암호화하여 변경
