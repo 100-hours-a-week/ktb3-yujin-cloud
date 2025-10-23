@@ -1,5 +1,6 @@
 package com.ktb3.community.post.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ktb3.community.post.dto.PostDto;
 import com.ktb3.community.post.entity.Post;
 import com.ktb3.community.post.service.PostService;
@@ -7,14 +8,13 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
@@ -47,8 +47,6 @@ public class PostController {
     /**
      * 게시물 상세 조회
      * @param postId
-     * @param page
-     * @param size
      * @param session
      * @return
      */
@@ -82,21 +80,26 @@ public class PostController {
     }
 
     /**
-     * 게시물 등록 - s3코드 추가할거 생각해서 예외던짐
-     * @param request
+     * 게시물 등록
+     * @param requestJson
+     * @param images
      * @param session
      * @return
      * @throws IOException
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PostDto.PostResponse> createPost(
-            @Valid @ModelAttribute PostDto.PostCreateRequest request,
-            HttpSession session) throws IOException{
+            @RequestParam("request") String requestJson,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            HttpSession session) throws IOException {
 
-        // 회원 조회
         Long memberId = getMemberIdFromSession(session);
 
-        PostDto.PostResponse response = postService.createPost(memberId,request);
+        // 문자열을 DTO로 직접 변환
+        ObjectMapper mapper = new ObjectMapper();
+        PostDto.PostCreateRequest request = mapper.readValue(requestJson, PostDto.PostCreateRequest.class);
+
+        PostDto.PostResponse response = postService.createPost(memberId, request, images);
         return ResponseEntity.ok(response);
     }
 

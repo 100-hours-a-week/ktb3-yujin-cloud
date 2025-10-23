@@ -145,7 +145,7 @@ public class PostService {
 
 
     @Transactional
-    public PostDto.PostResponse createPost(Long memberId, PostDto.PostCreateRequest request) {
+    public PostDto.PostResponse createPost(Long memberId, PostDto.PostCreateRequest request,List<MultipartFile> images) {
         // 1. 작성자(회원) 확인
         Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
                 .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
@@ -159,7 +159,7 @@ public class PostService {
         postRepository.save(post);
 
         // 3. 이미지 저장
-        List<String> imageUrls = fileService.savePostImages(post,request.getImages());
+        List<String> imageUrls = fileService.savePostImages(post,images);
 
         return PostDto.PostResponse.from(post,imageUrls);
 

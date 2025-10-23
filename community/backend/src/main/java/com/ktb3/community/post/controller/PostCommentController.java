@@ -107,6 +107,7 @@ public class PostCommentController {
 
     }
 
+    // 댓글 삭제
     @DeleteMapping("/{commentId}")
     public ResponseEntity<String> deleteComment(@PathVariable Long postId, @PathVariable Long commentId, HttpSession session) {
 

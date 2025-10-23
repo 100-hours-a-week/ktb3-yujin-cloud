@@ -1,11 +1,9 @@
 package com.ktb3.community.post.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ktb3.community.post.entity.Post;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -145,22 +143,11 @@ public class PostDto {
         private String title;
         @NotBlank(message = "내용을 입력해주세요.")
         private String content;
-        // 현재는 1개만 업로드되지만, 확장 가능하도록 List로 설계
-        @Size(max = 5, message = "이미지는 최대 5개까지 업로드 가능합니다")
-        private List<MultipartFile> images;
-
-        // @ModelAttribute 바인딩용 Setter
-        public void setTitle(String title) { this.title = title != null ? title.trim() : null; }
-
-        public void setContent(String content) { this.content = content != null ? content.trim() : null; }
-
-        public void setImages(List<MultipartFile> images) { this.images = images; }
 
         @Builder
-        public PostCreateRequest(String title, String content, List<MultipartFile> images) {
+        public PostCreateRequest(String title, String content) {
             this.title = title;
             this.content = content;
-            this.images = images;
         }
     }
 
