@@ -76,6 +76,7 @@ public class MemberDto {
     }
 
     // 회원정보 수정
+    @Getter
     public static class UpdateRequest {
         @NotBlank(message = "닉네임은 필수입니다.")
         @Size(min = 1, max = 10, message = "닉네임은 최대 10자까지만 가능합니다.")
