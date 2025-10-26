@@ -52,7 +52,7 @@ public class Post {
         this.hit = 0;
     }
 
-    public void updatePost(String text, String content) {
+    public void updatePost(String title, String content) {
         this.title = title;
         this.content = content;
     }

@@ -104,20 +104,43 @@ public class PostController {
     }
 
     /**
+     * 게시물 수정용 상세 불러오기
+     * @param postId
+     * @param session
+     * @return
+     */
+    @GetMapping("/edit/{postId}")
+    public ResponseEntity<PostDto.PostResponse> getPostForEdit(
+            @PathVariable Long postId,
+            HttpSession session) {
+
+        Long memberId = getMemberIdFromSession(session);
+        PostDto.PostResponse response = postService.getPostForEdit(postId, memberId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * 게시물 수정
      * @param postId
-     * @param request
+     * @param requestJson
      * @param session
      * @return
      * @throws IOException
      */
     @PatchMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PostDto.PostResponse> updatePost(
-            @PathVariable Long postId, @Valid @ModelAttribute PostDto.PostUpdateRequest request,
+            @PathVariable Long postId,
+            @RequestParam("request") String requestJson,
+//            @RequestPart(value = "images", required = false) List<MultipartFile> images,
             HttpSession session) throws IOException{
 
         // 회원 조회
         Long memberId = getMemberIdFromSession(session);
+
+        // 문자열을 DTO로 직접 변환
+        ObjectMapper mapper = new ObjectMapper();
+        PostDto.PostUpdateRequest request = mapper.readValue(requestJson, PostDto.PostUpdateRequest.class);
 
         PostDto.PostResponse response = postService.updatePost(postId, memberId, request);
 

@@ -1,5 +1,6 @@
 package com.ktb3.community.post.service;
 
+import com.ktb3.community.common.exception.BusinessException;
 import com.ktb3.community.file.entity.File;
 import com.ktb3.community.file.service.FileService;
 import com.ktb3.community.member.entity.Member;
@@ -11,6 +12,7 @@ import com.ktb3.community.post.repository.PostLikeRepository;
 import com.ktb3.community.post.repository.PostRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -89,7 +91,7 @@ public class PostService {
 
         // 1. 게시물 조회 (Member JOIN FETCH)
         Post post = postRepository.findByIdWithMember(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다."));
+                .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST,"존재하지 않는 게시물입니다."));
 
         // 2. 조회수 증가
         post.increaseHit();
@@ -148,7 +150,7 @@ public class PostService {
     public PostDto.PostResponse createPost(Long memberId, PostDto.PostCreateRequest request,List<MultipartFile> images) {
         // 1. 작성자(회원) 확인
         Member member = memberRepository.findByIdAndDeletedAtIsNull(memberId)
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(()-> new BusinessException(HttpStatus.BAD_REQUEST,"존재하지 않는 회원입니다."));
 
         // 2. 게시물 저장
         Post post = Post.builder()
@@ -166,11 +168,27 @@ public class PostService {
     }
 
     @Transactional
+    public PostDto.PostResponse getPostForEdit(Long postId, Long memberId) {
+
+        // 1. 게시물 조회 (Member JOIN FETCH)
+        Post post = postRepository.findByIdWithMember(postId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST,"존재하지 않는 게시물입니다."));
+
+        // 2. 작성자 수정 권한 확인
+        validateOwnership(post, memberId);
+
+        // 3. 이미지 URL 목록 조회
+        List<String> imageUrls = fileService.getPostImageUrls(postId);
+
+        return PostDto.PostResponse.from(post, imageUrls);
+    }
+
+    @Transactional
     public PostDto.PostResponse updatePost(Long postId, Long memberId, PostDto.PostUpdateRequest request) {
 
         // 1. 게시물 확인
         Post post = postRepository.findByIdAndDeletedAtIsNull(postId)
-                .orElseThrow(()-> new IllegalArgumentException("존재하지 않는 게시물 입니다."));
+                .orElseThrow(()->  new BusinessException(HttpStatus.BAD_REQUEST,"존재하지 않는 게시물입니다."));
 
         // 2. 작성자 수정 권한 확인
         validateOwnership(post, memberId);
