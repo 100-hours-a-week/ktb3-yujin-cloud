@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,7 +53,15 @@ public class AuthDto {
         public boolean isNewPasswordMatching(){
             return newPassword != null && newPassword.equals(newPasswordConfirm);
         }
+    }
 
+    @Getter @AllArgsConstructor
+    public static class TokenResponse {
+        private Long id;
+        private String email;
+        private String nickname;
+        private String accessToken;
+        private String refreshToken;
     }
 
 }
