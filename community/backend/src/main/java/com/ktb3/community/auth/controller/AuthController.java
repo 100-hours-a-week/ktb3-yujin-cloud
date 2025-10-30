@@ -3,6 +3,7 @@ package com.ktb3.community.auth.controller;
 import com.ktb3.community.auth.annotation.AuthMemberId;
 import com.ktb3.community.auth.dto.AuthDto;
 import com.ktb3.community.auth.service.AuthService;
+import com.ktb3.community.auth.util.CookieUtil;
 import com.ktb3.community.common.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -22,95 +23,47 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final CookieUtil cookieUtil;
 
-    // 로그인
+    /**
+     * 로그인
+     * @param request
+     * @return
+     */
     @PostMapping
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody AuthDto.LoginRequest request) {
-        AuthDto.TokenResponse tr = authService.login(request);
 
-        // Access Token 쿠키로
-        ResponseCookie atCookie = ResponseCookie.from("accessToken", tr.getAccessToken())
-                .httpOnly(true)
-                .secure(false)     // 개발 중엔 false (HTTP 가능)
-                .path("/")
-                .maxAge(Duration.ofMinutes(30))
-                .sameSite("Lax")
-                .build();
+        AuthDto.TokenResponse response = authService.login(request);
 
-        // Refresh Token 쿠키로
-        ResponseCookie rtCookie = ResponseCookie.from("refreshToken", tr.getRefreshToken())
-                .httpOnly(true)
-                .secure(false)     // 개발 중엔 false (HTTP 가능)
-                .path("/")
-                .maxAge(Duration.ofDays(7))
-                .sameSite("Strict")
-                .build();
-
-        // 유저 정보는 JSON 응답으로
-        Map<String, Object> body = Map.of(
-                "id", tr.getId(),
-                "email", tr.getEmail(),
-                "nickname", tr.getNickname()
-        );
-
-        return ResponseEntity.ok()
-                .headers(h -> {
-                    h.add(HttpHeaders.SET_COOKIE, atCookie.toString());
-                    h.add(HttpHeaders.SET_COOKIE, rtCookie.toString());
-                })
-                .body(body);
+        return createTokenResponse(response);
     }
 
-    // access 토큰 재발급
+    /**
+     * 토큰 재발급
+     * @param request
+     * @return
+     */
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, Object>> refreshToken(HttpServletRequest request) {
 
-        AuthDto.TokenResponse tr = authService.refresh(request);
+        AuthDto.TokenResponse response = authService.refresh(request);
 
-        // 새 Access / Refresh 쿠키 발급
-        ResponseCookie atCookie = ResponseCookie.from("accessToken", tr.getAccessToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(Duration.ofMinutes(30))
-                .sameSite("Lax")
-                .build();
-
-        ResponseCookie rtCookie = ResponseCookie.from("refreshToken", tr.getRefreshToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(Duration.ofDays(7))
-                .sameSite("Strict")
-                .build();
-
-        return ResponseEntity.ok()
-                .headers(h -> {
-                    h.add(HttpHeaders.SET_COOKIE, atCookie.toString());
-                    h.add(HttpHeaders.SET_COOKIE, rtCookie.toString());
-                })
-                .body(Map.of("message", "토큰 재발급 성공"));
+        return createTokenResponse(response);
     }
 
-    // 로그아웃
+    /**
+     * 로그아웃
+     * @param request
+     * @return
+     */
     @DeleteMapping
     public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
+
         authService.logout(request);
 
         // AccessToken & RefreshToken 쿠키 삭제
-        ResponseCookie atCookie = ResponseCookie.from("accessToken", "")
-                .maxAge(0)
-                .path("/")
-                .httpOnly(true)
-                .sameSite("Lax")
-                .build();
-
-        ResponseCookie rtCookie = ResponseCookie.from("refreshToken", "")
-                .maxAge(0)
-                .path("/")
-                .httpOnly(true)
-                .sameSite("Strict")
-                .build();
+        ResponseCookie atCookie = cookieUtil.deleteAccessTokenCookie();
+        ResponseCookie rtCookie = cookieUtil.deleteRefreshTokenCookie();
 
         Map<String, String> body = Map.of("message", "로그아웃 완료");
 
@@ -122,7 +75,12 @@ public class AuthController {
                 .body(body);
     }
 
-    // 비밀번호 변경
+    /**
+     * 비밀번호 변경
+     * @param request
+     * @param memberId
+     * @return
+     */
     @PatchMapping("/password")
     public ResponseEntity<Map<String, String>>  changePassword(
             @Valid @RequestBody AuthDto.ChangePasswordRequest request,
@@ -140,8 +98,29 @@ public class AuthController {
 
     }
 
+    /**
+     * 토큰 응답 생성 (로그인, 리프레시 공통)
+     * @param response
+     * @return
+     */
+    private ResponseEntity<Map<String, Object>> createTokenResponse(AuthDto.TokenResponse response) {
+        // 쿠키 생성
+        var accessCookie = cookieUtil.createAccessTokenCookie(response.getAccessToken());
+        var refreshCookie = cookieUtil.createRefreshTokenCookie(response.getRefreshToken());
 
+        // 응답 Body (토큰은 쿠키로만, 회원정보만 JSON) - 사용안할시 삭제예정
+        Map<String, Object> body = Map.of(
+                "id", response.getId(),
+                "email", response.getEmail(),
+                "nickname", response.getNickname()
+        );
 
-
+        return ResponseEntity.ok()
+                .headers(headers -> {
+                    headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
+                    headers.add(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+                })
+                .body(body);
+    }
 
 }
