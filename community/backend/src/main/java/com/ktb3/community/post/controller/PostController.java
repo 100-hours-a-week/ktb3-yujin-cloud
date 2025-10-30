@@ -1,12 +1,9 @@
 package com.ktb3.community.post.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ktb3.community.auth.annotation.AuthMemberId;
 import com.ktb3.community.post.dto.PostDto;
-import com.ktb3.community.post.entity.Post;
 import com.ktb3.community.post.service.PostService;
-import jakarta.servlet.annotation.MultipartConfig;
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/posts")
@@ -47,43 +45,26 @@ public class PostController {
     /**
      * 게시물 상세 조회
      * @param postId
-     * @param session
+     * @param memberId
      * @return
      */
     @GetMapping("/{postId}")
     public ResponseEntity<PostDto.PostDetailResponse> getPostDetail(
             @PathVariable Long postId,
-            HttpSession session) {
+            @AuthMemberId Long memberId) {
 
-        // 1. 현재 로그인한 회원 ID 조회
-        Long currentMemberId = getMemberIdFromSession(session);
-
-        // 2. 게시물 상세 조회
-        PostDto.PostDetailResponse response = postService.getPostDetail(postId, currentMemberId);
+        // 게시물 상세 조회
+        PostDto.PostDetailResponse response = postService.getPostDetail(postId, memberId);
 
         return ResponseEntity.ok(response);
     }
 
 
-
-    /**
-     *본인 로그인 확인
-     */
-    private Long getMemberIdFromSession(HttpSession session) {
-        Long memberId = (Long) session.getAttribute("memberId");
-
-        if (memberId == null) {
-            throw new IllegalArgumentException("로그인 정보가 없습니다.");
-        }
-
-        return memberId;
-    }
-
     /**
      * 게시물 등록
      * @param requestJson
      * @param images
-     * @param session
+     * @param memberId
      * @return
      * @throws IOException
      */
@@ -91,30 +72,27 @@ public class PostController {
     public ResponseEntity<PostDto.PostResponse> createPost(
             @RequestParam("request") String requestJson,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            HttpSession session) throws IOException {
-
-        Long memberId = getMemberIdFromSession(session);
+            @AuthMemberId Long memberId) throws IOException {
 
         // 문자열을 DTO로 직접 변환
         ObjectMapper mapper = new ObjectMapper();
-        PostDto.PostCreateRequest request = mapper.readValue(requestJson, PostDto.PostCreateRequest.class);
+        PostDto.PostCreateRequest postRequest = mapper.readValue(requestJson, PostDto.PostCreateRequest.class);
 
-        PostDto.PostResponse response = postService.createPost(memberId, request, images);
-        return ResponseEntity.ok(response);
+        PostDto.PostResponse postResponse = postService.createPost(memberId, postRequest, images);
+        return ResponseEntity.ok(postResponse);
     }
 
     /**
      * 게시물 수정용 상세 불러오기
      * @param postId
-     * @param session
+     * @param memberId
      * @return
      */
     @GetMapping("/edit/{postId}")
     public ResponseEntity<PostDto.PostResponse> getPostForEdit(
             @PathVariable Long postId,
-            HttpSession session) {
+            @AuthMemberId Long memberId) {
 
-        Long memberId = getMemberIdFromSession(session);
         PostDto.PostResponse response = postService.getPostForEdit(postId, memberId);
 
         return ResponseEntity.ok(response);
@@ -124,7 +102,8 @@ public class PostController {
      * 게시물 수정
      * @param postId
      * @param requestJson
-     * @param session
+     * @param images
+     * @param memberId
      * @return
      * @throws IOException
      */
@@ -132,11 +111,9 @@ public class PostController {
     public ResponseEntity<PostDto.PostResponse> updatePost(
             @PathVariable Long postId,
             @RequestParam("request") String requestJson,
-//            @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            HttpSession session) throws IOException{
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @AuthMemberId Long memberId) throws IOException{
 
-        // 회원 조회
-        Long memberId = getMemberIdFromSession(session);
 
         // 문자열을 DTO로 직접 변환
         ObjectMapper mapper = new ObjectMapper();
@@ -150,18 +127,15 @@ public class PostController {
     /**
      * 게시물 삭제
      * @param postId
-     * @param session
+     * @param memberId
      * @return
      */
     @DeleteMapping("/{postId}")
-    public ResponseEntity<String> deletePost(@PathVariable Long postId, HttpSession session) {
-
-        // 회원 조회
-        Long memberId = getMemberIdFromSession(session);
+    public ResponseEntity<Map<String, String>> deletePost(@PathVariable Long postId, @AuthMemberId Long memberId) {
 
         postService.deletePost(postId, memberId);
 
-        return ResponseEntity.ok("게시물이 삭제되었습니다.");
+        return ResponseEntity.ok(Map.of("message", "게시물이 삭제되었습니다."));
 
     }
 

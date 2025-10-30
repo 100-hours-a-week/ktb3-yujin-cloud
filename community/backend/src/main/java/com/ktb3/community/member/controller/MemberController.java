@@ -1,9 +1,11 @@
 package com.ktb3.community.member.controller;
 
+import com.ktb3.community.auth.annotation.AuthMemberId;
+import com.ktb3.community.auth.controller.AuthController;
 import com.ktb3.community.common.exception.BusinessException;
 import com.ktb3.community.member.dto.MemberDto;
 import com.ktb3.community.member.service.MemberService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -43,14 +45,9 @@ public class MemberController {
 
     // 회원 정보 조회
     @GetMapping("/me")
-    public ResponseEntity<MemberDto.DetailResponse> getMember(HttpSession session) {
-        // 로그인 및 본인 확인
-        Long loginMemberId = (Long) session.getAttribute("memberId");
-        if (loginMemberId == null) {
-            throw new BusinessException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다");
-        }
+    public ResponseEntity<MemberDto.DetailResponse> getMember(@AuthMemberId Long memberId) {
 
-        MemberDto.DetailResponse response = memberService.getMemberDetail(loginMemberId);
+        MemberDto.DetailResponse response = memberService.getMemberDetail(memberId);
         return ResponseEntity.ok(response);
     }
 
@@ -64,13 +61,7 @@ public class MemberController {
             String nickname,
             @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
             @RequestParam(value = "deleteProfileImage", required = false, defaultValue = "false") Boolean deleteProfileImage,
-            HttpSession session) {
-
-        // 로그인 및 본인 확인
-        Long loginMemberId = (Long) session.getAttribute("memberId");
-        if (loginMemberId == null) {
-            throw new BusinessException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다");
-        }
+            @AuthMemberId Long memberId) {
 
         // 최소한 하나는 수정되어야 함
         if (nickname == null && profileImage == null && !deleteProfileImage) {
@@ -88,28 +79,22 @@ public class MemberController {
             // 이미지 사이즈 제한 필요한가?
         }
 
-        MemberDto.DetailResponse response = memberService.updateMember(loginMemberId, nickname,profileImage,deleteProfileImage);
+        MemberDto.DetailResponse response = memberService.updateMember(memberId, nickname,profileImage,deleteProfileImage);
 
         return ResponseEntity.ok(response);
     }
 
     // 회원 탈퇴
     @DeleteMapping("/withdraw")
-    public ResponseEntity<String> deleteMember (HttpSession session) {
+    public ResponseEntity<Map<String, String>> deleteMember (@AuthMemberId Long memberId, HttpServletRequest request) {
 
-        // 1. 로그인 및 본인 확인
-        Long loginMemberId = (Long) session.getAttribute("memberId");
-        if (loginMemberId == null) {
-            throw new BusinessException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다");
-        }
+        // 1. 탈퇴
+        memberService.deleteMember(memberId);
 
-        // 2. 탈퇴
-        memberService.deleteMember(loginMemberId);
+        // 2. 로그아웃(토큰 쿠키 삭제)
+        // TODO. authController인지 authSErvice인지 로그아웃 연결
 
-        // 3. 세션 무효화 (로그아웃)
-        session.invalidate();
-
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다");
+        return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다"));
     }
 
 }
