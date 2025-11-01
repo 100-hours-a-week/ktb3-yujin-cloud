@@ -1,11 +1,16 @@
 package com.ktb3.community.auth.service;
 
 import com.ktb3.community.auth.dto.AuthDto;
+import com.ktb3.community.auth.repository.RefreshTokenRepository;
 import com.ktb3.community.common.exception.BusinessException;
+import com.ktb3.community.common.util.JwtProvider;
 import com.ktb3.community.member.entity.Member;
 import com.ktb3.community.member.entity.MemberAuth;
 import com.ktb3.community.member.repository.MemberAuthRepository;
 import com.ktb3.community.member.repository.MemberRepository;
+import io.jsonwebtoken.Claims;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,8 +25,11 @@ public class AuthService {
     private final MemberRepository memberRepository;
     private final MemberAuthRepository memberAuthRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenService tokenService;
 
-    public AuthDto.LoginResponse login(AuthDto.LoginRequest request){
+    public AuthDto.TokenResponse login(AuthDto.LoginRequest request){
 
         // 1. 이메일로 회원조회
         Member member = memberRepository.findByEmailAndDeletedAtIsNull(request.getEmail())
@@ -36,11 +44,56 @@ public class AuthService {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
         }
 
-        return AuthDto.LoginResponse.builder()
-                .id(member.getId())
-                .email(member.getEmail())
-                .nickname(member.getNickname())
-                .build();
+        // 토큰 발급
+        TokenService.TokenInfo tokens = tokenService.createTokens(member);
+
+        return new AuthDto.TokenResponse(
+                member.getId(), member.getEmail(), member.getNickname(),
+                tokens.accessToken(),
+                tokens.refreshToken()
+        );
+
+    }
+
+    public AuthDto.TokenResponse refresh(HttpServletRequest request){
+
+        // 1. 쿠키에서 리프레시 토큰 추출
+        String refreshToken = tokenService.extractRefreshToken(request);
+        if (refreshToken == null) {
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "Refresh Token이 없습니다.");
+        }
+
+        // 2. Refresh Token 검증
+        var savedToken = tokenService.validateRefreshToken(refreshToken);
+
+        // 3. 회원 정보 조회
+        Member member = memberRepository.findByIdAndDeletedAtIsNull(savedToken.getMemberId())
+                .orElseThrow(() -> new BusinessException(HttpStatus.UNAUTHORIZED, "회원 정보를 찾을 수 없습니다."));
+
+        // 4. 새 Access / Refresh Token 생성 (회전)
+        TokenService.TokenInfo tokens = tokenService.rotateTokens(savedToken, member);
+
+        return new AuthDto.TokenResponse(member.getId(), member.getEmail(), member.getNickname(), tokens.accessToken(),
+                tokens.refreshToken());
+
+    }
+
+    @Transactional
+    public void logout(HttpServletRequest request) {
+
+        String refreshToken = tokenService.extractRefreshToken(request);
+        if (refreshToken == null) {
+            return; // 쿠키가 이미 없으면 그냥 종료
+        }
+        try {
+            // memberId 추출 후 토큰 삭제
+            Claims claims = jwtProvider.claims(refreshToken);
+            Long memberId = claims.get("id", Long.class);
+
+            refreshTokenRepository.deleteByMemberId(memberId);
+        } catch (BusinessException e) {
+            // 만료된 토큰이면 무시 (이미 무효)
+        }
 
     }
 

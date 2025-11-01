@@ -42,15 +42,6 @@ public class MemberService {
     @Transactional
     public SignUpResponse signUp(SignUpRequest request){
 
-
-//        if (isEmailDuplicate(request.getEmail())) {
-//            throw new IllegalArgumentException("중복된 이메일입니다.");
-//        }
-//
-//        if (isNicknameDuplicate(request.getEmail())) {
-//            throw new IllegalArgumentException("중복된 닉네입입니다.");
-//        }
-
         if(!request.isPasswordMatching()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다.");
         }
