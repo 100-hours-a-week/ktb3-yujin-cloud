@@ -21,4 +21,4 @@ out/
 target/
 
 # Test configuration (local only)
-src/test/resources/application.yml
+src/test/

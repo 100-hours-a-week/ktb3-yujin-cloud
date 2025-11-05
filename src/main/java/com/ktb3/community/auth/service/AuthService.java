@@ -90,7 +90,7 @@ public class AuthService {
             Claims claims = jwtProvider.claims(refreshToken);
             Long memberId = claims.get("id", Long.class);
 
-            refreshTokenRepository.deleteByMemberId(memberId);
+            tokenService.deleteRefreshToken(memberId);
         } catch (BusinessException e) {
             // 만료된 토큰이면 무시 (이미 무효)
         }

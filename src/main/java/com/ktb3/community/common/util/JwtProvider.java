@@ -55,6 +55,7 @@ public class JwtProvider {
                 .compact();
     }
 
+    // TODO. 이 만료검증이 DB의 값이 되어여할거 같은데?
     public boolean validate(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
