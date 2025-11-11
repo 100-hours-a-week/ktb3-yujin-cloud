@@ -17,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import static com.ktb3.community.common.constant.TokenConst.*;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -58,7 +60,7 @@ public class AuthService {
     public AuthDto.TokenResponse refresh(HttpServletRequest request){
 
         // 1. 쿠키에서 리프레시 토큰 추출
-        String refreshToken = tokenService.extractRefreshToken(request);
+        String refreshToken = jwtProvider.extractToken(request, REFRESH_TOKEN);
         if (refreshToken == null) {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "Refresh Token이 없습니다.");
         }
@@ -81,7 +83,7 @@ public class AuthService {
     @Transactional
     public void logout(HttpServletRequest request) {
 
-        String refreshToken = tokenService.extractRefreshToken(request);
+        String refreshToken = jwtProvider.extractToken(request, REFRESH_TOKEN);
         if (refreshToken == null) {
             return; // 쿠키가 이미 없으면 그냥 종료
         }
