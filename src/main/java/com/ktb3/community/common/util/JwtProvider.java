@@ -5,6 +5,8 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
+
+import static com.ktb3.community.common.constant.TokenConst.*;
 
 @Component
 public class JwtProvider {
@@ -73,7 +77,19 @@ public class JwtProvider {
         try { Base64.getDecoder().decode(s); return true; } catch (IllegalArgumentException e) { return false; }
     }
 
-    public Key getKey() {
-        return key;
+    /**
+     * Request에서 Token 추출
+     * @param request
+     * @return
+     */
+    public String extractToken(HttpServletRequest request, String cookieName) {
+        if (request.getCookies() == null) return null;
+        for (Cookie cookie : request.getCookies()) {
+            if (cookieName.equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
+
 }

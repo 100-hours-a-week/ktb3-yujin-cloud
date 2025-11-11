@@ -6,8 +6,6 @@ import com.ktb3.community.common.exception.BusinessException;
 import com.ktb3.community.common.util.JwtProvider;
 import com.ktb3.community.member.entity.Member;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -62,21 +60,6 @@ public class TokenService {
         // 기존 토큰 무효화 후 새로 저장 - 보안상의 이유로 ‘중복 로그인 방지’ 및 ‘토큰 탈취 대응'을 위함
         refreshTokenRepository.deleteByMemberId(memberId);
         refreshTokenRepository.save(new RefreshToken(memberId, refreshToken, expiresAt));
-    }
-
-    /**
-     * Request에서 Refresh Token 추출
-     * @param request
-     * @return
-     */
-    public String extractRefreshToken(HttpServletRequest request) {
-        if (request.getCookies() == null) return null;
-        for (Cookie cookie : request.getCookies()) {
-            if ("refreshToken".equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-        return null;
     }
 
     /**

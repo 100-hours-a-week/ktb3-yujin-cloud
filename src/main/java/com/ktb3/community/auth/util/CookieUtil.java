@@ -3,12 +3,11 @@ package com.ktb3.community.auth.util;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import java.time.Duration;
+import static com.ktb3.community.common.constant.TokenConst.*;
 
 @Component
 public class CookieUtil {
 
-    public static final String ACCESS_TOKEN = "accessToken";
-    public static final String REFRESH_TOKEN = "refreshToken";
 
     /**
      * Access Token 쿠키 생성
